@@ -63,19 +63,19 @@ public class Robot extends TimedRobot {
 	}
   
   public double leftYAxis(){
-    return Math.pow(this.getAxis(1) * 1, 5);
+    return Math.pow(this.getAxis(1) * 1, 3);
   }
 
   public double leftXAxis(){
-    return Math.pow(this.getAxis(0) * 1, 5);
+    return Math.pow(this.getAxis(0) * 1, 3);
   }
 
   public double rightYAxis(){
-   return Math.pow(this.getAxis(5) * 1, 5);
+   return Math.pow(this.getAxis(5) * 1, 3);
   }
 
   public double rightXAxis(){
-    return Math.pow(this.getAxis(4) * 1, 5);
+    return Math.pow(this.getAxis(4) * 1, 3);
 
   }
 
@@ -85,8 +85,8 @@ public class Robot extends TimedRobot {
        forwardPercent = this.leftYAxis();
 
        //calculate leftSideSpeed and rightSideSpeed
-       double leftSideSpeed = (forwardPercent + turnPercent * (Math.abs(forwardPercent)));
-       double rightSideSpeed = (forwardPercent - turnPercent * (Math.abs(forwardPercent)));
+       double leftSideSpeed = (forwardPercent + turnPercent );
+       double rightSideSpeed = (forwardPercent - turnPercent );
 
        m_frontLeft.set (VictorSPXControlMode.PercentOutput, leftSideSpeed);
        //System.out.println(leftYAxis());
