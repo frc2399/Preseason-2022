@@ -9,25 +9,30 @@ import edu.wpi.first.wpilibj.SlewRateLimiter;
 
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 
+import frc.robot.commands.*;
 
 /**
- * This is a demo program showing the use of the DifferentialDrive class. Runs the motors with
- * arcade steering.
+ * This is a demo program showing the use of the DifferentialDrive class. Runs
+ * the motors with arcade steering.
  */
 public class Robot extends TimedRobot {
 
-    VictorSPX m_frontLeft = new VictorSPX(4);
-    TalonSRX m_rearLeft = new TalonSRX(1);
+  public static VictorSPX m_frontLeft = new VictorSPX(4);
+  public static VictorSPX m_rearLeft = new VictorSPX(1);
 
-    VictorSPX m_frontRight = new VictorSPX (3);
-    VictorSPX m_rearRight = new VictorSPX (2);
+  public static VictorSPX m_frontRight = new VictorSPX(3);
+  public static VictorSPX m_rearRight = new VictorSPX(2);
 
-    public static Joystick xBox = new Joystick(0);
+  public static Joystick xBox = new Joystick(0);
 
-    SlewRateLimiter filter; 
+  SlewRateLimiter filter;
+
+  CommandBase autonomousCommand;
     
     double turnPercent, forwardPercent;
 
@@ -40,6 +45,7 @@ public class Robot extends TimedRobot {
       m_rearLeft.follow(m_frontLeft) ;
       m_rearRight.follow(m_frontRight) ;
        m_frontLeft.setInverted(true); // if you want to invert the entire side you can do so here
+       autonomousCommand = new DriveForwardGivenTime(0.3, 0.75);
     }
   private final Joystick joystick = new Joystick(1);
 
@@ -77,6 +83,13 @@ public class Robot extends TimedRobot {
   public double rightXAxis(){
     return Math.pow(this.getAxis(4) * 1, 3);
 
+  }
+
+  @Override
+  public void autonomousInit() {
+    // schedule the autonomous command (example)
+    if (autonomousCommand != null) 
+      ((Object) autonomousCommand).start();
   }
 
   public void teleopPeriodic() {
