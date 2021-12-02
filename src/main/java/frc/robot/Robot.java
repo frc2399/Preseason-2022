@@ -4,17 +4,18 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SlewRateLimiter;
-
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-
-import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
-
-import frc.robot.commands.*;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.commands.DriveForwardGivenTime;
+import frc.robot.commands.TurnGivenTime;
 
 /**
  * This is a demo program showing the use of the DifferentialDrive class. Runs
@@ -28,7 +29,15 @@ public class Robot extends TimedRobot {
   public static VictorSPX m_frontRight = new VictorSPX(3);
   public static VictorSPX m_rearRight = new VictorSPX(2);
 
+  private double speed = 0.3;
+  private double driveTime = 0.75;
+  private double turnTime = 0.75;
+
   public static Joystick xBox = new Joystick(0);
+  Button[] xBoxButtons;
+
+  CommandBase squareSideCommand;
+  CommandBase squareCommand;
 
   SlewRateLimiter filter;
 
@@ -39,6 +48,12 @@ public class Robot extends TimedRobot {
      public void teleopInit() {
        filter = new SlewRateLimiter(getSlewRateLimiter());
        System.out.println ("SlewRateLimiter");
+
+       xBoxButtons = getButtons(xBox); 
+   
+       xBoxButtons [1].whenPressed (squareCommand);
+       xBoxButtons[3].whenPressed(new DriveForwardGivenTime(0.3, 0.75));
+       //button 3 is button x :)
      }
 
     public void robotInit() {
@@ -46,6 +61,22 @@ public class Robot extends TimedRobot {
       m_rearRight.follow(m_frontRight) ;
        m_frontLeft.setInverted(true); // if you want to invert the entire side you can do so here
        autonomousCommand = new DriveForwardGivenTime(0.3, 0.75);
+
+      squareSideCommand = new SequentialCommandGroup (
+        new DriveForwardGivenTime(speed, driveTime),
+        new TurnGivenTime(speed, turnTime));
+
+      squareCommand = new SequentialCommandGroup (
+        new DriveForwardGivenTime(speed, driveTime),
+        new TurnGivenTime(speed, turnTime),
+        new DriveForwardGivenTime(speed, driveTime),
+        new TurnGivenTime(speed, turnTime),
+        new DriveForwardGivenTime(speed, driveTime),
+        new TurnGivenTime(speed, turnTime),
+        new DriveForwardGivenTime(speed, driveTime),
+        new TurnGivenTime(speed, turnTime));
+
+    
     }
   private final Joystick joystick = new Joystick(1);
 
@@ -55,6 +86,15 @@ public class Robot extends TimedRobot {
     return slewRateLimiter;
   }
 
+  public static Button[] getButtons(Joystick controller) {
+    Button[] controllerButtons = new Button[controller.getButtonCount() + 1];
+    System.out.println("controller.getButtonCount() " + controller.getButtonCount());
+		for(int i = 1; i < controllerButtons.length; i++) {
+			controllerButtons[i] = new JoystickButton(controller, i);
+		}
+		return controllerButtons;
+  }
+  
   public double getAxis(int axis) 
   {
 		 double val = xBox.getRawAxis(axis);
@@ -89,7 +129,8 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     // schedule the autonomous command (example)
     if (autonomousCommand != null) 
-      ((Object) autonomousCommand).start();
+     // ((Object) autonomousCommand).start();
+     autonomousCommand.schedule();
   }
 
   public void teleopPeriodic() {
@@ -101,9 +142,11 @@ public class Robot extends TimedRobot {
        double leftSideSpeed = (forwardPercent + turnPercent );
        double rightSideSpeed = (forwardPercent - turnPercent );
 
-       m_frontLeft.set (VictorSPXControlMode.PercentOutput, leftSideSpeed);
+       m_frontLeft.set (VictorSPXControlMode.PercentOutput, 0.5 * leftSideSpeed);
        //System.out.println(leftYAxis());
-       m_frontRight.set (VictorSPXControlMode.PercentOutput, rightSideSpeed);
+       m_frontRight.set (VictorSPXControlMode.PercentOutput, 0.5 * rightSideSpeed);
+       System.out.println(leftSideSpeed);
+       System.out.println(rightSideSpeed);
        //System.out.println(rightYAxis());
    }
     // // Tank drive with a given left and right rates
